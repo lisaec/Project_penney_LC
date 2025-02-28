@@ -206,5 +206,4 @@ def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "array
     
    
 
-    return results, results_cards_rate, results_tricks_rate, ties_cards_rate, ties_tricks_rate
-
+    return results, results_cards_rate, results_tricks_rate, ties_cards_rate, ties_tricks_rate, len(decks)
