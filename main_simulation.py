@@ -13,6 +13,7 @@ SEQUENCES = [
     [0, 0, 0]
 ]
 
+
 #making a list of combinations of the sequences
 COMBINATIONS = [(player_1_seq, player_2_seq) for player_1_seq in SEQUENCES for player_2_seq in SEQUENCES]
 

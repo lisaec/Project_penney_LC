@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-
 def make_plot(filename = str,
               cards = 'DataFrame',
               tricks = 'DataFrame',
