@@ -1,85 +1,22 @@
 import numpy as np
 import pandas as pd
-import random
-import datetime
 
-import os
-import json 
-from importlib import reload
+#defining all possible sequences
+SEQUENCES = [
+    [1, 1, 1],
+    [1, 1, 0],
+    [1, 0, 1],
+    [1, 0, 0],
+    [0, 1, 1],
+    [0, 1, 0],
+    [0, 0, 1],
+    [0, 0, 0]
+]
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+#making a list of combinations of the sequences
+COMBINATIONS = [(player_1_seq, player_2_seq) for player_1_seq in SEQUENCES for player_2_seq in SEQUENCES]
 
 
-
-HALF_DECK_SIZE = 26
-
-def get_decks(n_decks: int, seed: 'rng', 
-              half_deck_size: int = HALF_DECK_SIZE, 
-              ) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Generate `n_decks` shuffled decks using NumPy.
-    
-    Returns:
-        decks (np.ndarray): 2D array of shape (n_decks, num_cards), 
-        each row is a shuffled deck.
-
-    """
-    init_deck = [0]*half_deck_size + [1]*half_deck_size
-    decks = np.tile(init_deck, (n_decks, 1))
-    seed.permuted(decks, axis=1, out=decks)
-
-    return decks
-
-def init_seed(filepath = "data") -> "filename of first seed":
-    """creates a first seedpath to use when generating decks"""
-    
-    rng = np.random.default_rng()
-    
-    new_seed_file = f"state_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
-    
-    # Save the state
-    state = rng.bit_generator.state
-    seed_path_out = f"{filepath}/{new_seed_file}"
-    
-    with open(seed_path_out, 'w') as f:
-        json.dump(state, f)
-     
-    return new_seed_file
-    
-
-def save_decks(n_decks: int, seed_path = None, filepath = "data") -> str:
-    
-    """Saves n decks using a random state saved in seed_path
-        If no seedpath is given, it will generate a new random state
-        returns name of file storing decks"""
-    
-    if seed_path == None:
-        seed_path = init_seed()
-    
-    rng = np.random.default_rng()
-    
-    #opening state from seed_path
-    with open(f'{filepath}/{seed_path}', 'r') as f:
-        rng.bit_generator.state = json.load(f)
-    
-    #gen decks
-    decks = get_decks(n_decks, rng)
-    
-    deck_file = f"{filepath}/decks_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.npy"
-    
-    #save_decks
-    np.save(deck_file, decks)
-    
-    # Save the state
-    state = rng.bit_generator.state
-    seed_path_out = f"{filepath}/state_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.json"
-    
-    with open(seed_path_out, 'w') as f:
-        json.dump(state, f)
-
-    return deck_file
-    
 
 def play_game(deck: 'arr', player_1_seq: list, player_2_seq: list) -> dict:
     
@@ -174,22 +111,6 @@ def play_game(deck: 'arr', player_1_seq: list, player_2_seq: list) -> dict:
     return output
         
     
-#defining all possible sequences
-SEQUENCES = [
-    [1, 1, 1],
-    [1, 1, 0],
-    [1, 0, 1],
-    [1, 0, 0],
-    [0, 1, 1],
-    [0, 1, 0],
-    [0, 0, 1],
-    [0, 0, 0]
-]
-
-
-#making a list of combinations of the sequences
-COMBINATIONS = [(player_1_seq, player_2_seq) for player_1_seq in SEQUENCES for player_2_seq in SEQUENCES]
-
 
 def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "arrays":
     
@@ -286,49 +207,3 @@ def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "array
 
     return results, results_cards_rate, results_tricks_rate, ties_cards_rate, ties_tricks_rate
 
-
-def make_plot(filename = str,
-              cards = 'DataFrame',
-              tricks = 'DataFrame',
-              ties_cards = 'DataFrame',
-              ties_tricks = 'DataFrame') -> None:
-
-    """makes two heatmaps of game outcomes, one for cards and one for tricks.
-        ties are shown in parentheses below win rate
-        saves plot as filename given in a folder, heatmaps"""
-
-    # set colortheme
-    sns.set_theme(style='white')
-
-    #create subplots
-    fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-
-    #creating label dataframes
-    annot_cards = cards.map(lambda x: f"{x:.1f}%") + "\n(" + ties_cards.map(lambda x: f"{x:.1f}%") + ")"
-    annot_tricks = tricks.map(lambda x: f"{x:.1f}%") + "\n(" + ties_tricks.map(lambda x: f"{x:.1f}%") + ")"
-
-    #colors
-    cmap = sns.color_palette("crest", as_cmap=True).copy()
-    cmap.set_bad(color="lightgray")
-
-    # Cards
-    sns.heatmap(cards,linewidth=.5, cmap= cmap, ax=axes[0], cbar=False, annot = annot_cards, fmt = "")
-    axes[0].set_title("Cards")
-    axes[0].set_xlabel("Player 1 Selection")
-    axes[0].set_ylabel("Player 2 Selection") 
-    axes[0].tick_params(axis='y', rotation=0)
-
-    # Tricks
-    sns.heatmap(tricks,linewidth=.5, cmap= cmap, ax=axes[1], cbar=False, annot = annot_tricks, fmt = "")
-    axes[1].set_title("Tricks")
-    axes[1].set_xlabel("Player 1 Selection")
-    axes[1].set_ylabel("Player 2 Selection") 
-    axes[1].tick_params(axis='y', rotation=0)
-
-    #whitespace
-    plt.subplots_adjust(wspace=0.2)
-
-    #save
-    plt.savefig(f'heatmaps/{filename}')
-    
-    return None
