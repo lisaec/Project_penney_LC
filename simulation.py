@@ -115,6 +115,8 @@ def play_game(deck: 'arr', player_1_seq: list, player_2_seq: list) -> dict:
 
 def simulate_combination(player_1_seq, player_2_seq, decks, old_wins = None) -> "arrays":
 
+    """simulates many games in a single combination of player sequence choices"""
+
         #creating a dictionary recording wins 
         
         #if an existing dictionary of wins is passed, continue adding to it 
@@ -167,6 +169,9 @@ def simulate_combination(player_1_seq, player_2_seq, decks, old_wins = None) -> 
 
 def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "dataframe":
 
+    """simulates many games for all combinations and returns a dataframe of results, 
+    the number of games played, and a dictionary of wins"""
+
     #loading decks
     decks = np.load(deck_path)
 
@@ -197,6 +202,7 @@ def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "dataf
 
 def process_results(results, n_games):
     
+    """processess results dataframe to multiple arrays for visualization and analysis"""
     #reshape card results to be an array
     results_cards = results[['player_1_seq', 'player_2_seq', 'player_1_wins_cards']]
 
@@ -231,6 +237,9 @@ def process_results(results, n_games):
 
 
 def add_decks (old_wins, old_results, new_deck_path, n_games, combinations = COMBINATIONS):
+
+    """adds additiona simulations to existing simulations and returns the same thing
+    as simulate games"""
 
     #loading decks
     new_decks = np.load(new_deck_path)
