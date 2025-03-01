@@ -111,39 +111,29 @@ def play_game(deck: 'arr', player_1_seq: list, player_2_seq: list) -> dict:
         
     return output
         
-    
+ 
 
-def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "arrays":
-    
-    """ Simulates games played on all submitted decks on all combinations given in combinations 
-    
-    returns a record of all combination outcomes, and arrays of percentage likelihood of card wins, trick wins,
-    card ties and trick ties for each combination
-    """
-    decks = np.load(deck_path)
-    
-    #creating an empty dataframe of results
-    results = pd.DataFrame(columns = ('player_1_seq',
-                                    'player_2_seq',
-                                    'player_1_wins_cards', 
-                                    'ties_cards', 
-                                    'player_1_wins_tricks',
-                                    'ties_tricks'))
+def simulate_combination(player_1_seq, player_2_seq, decks, old_wins = None) -> "arrays":
 
-    #simulate games for each combination
-    for (player_1_seq, player_2_seq) in combinations:
-    
         #creating a dictionary recording wins 
-        wins_dict = {
-        'player_1_seq':str(player_1_seq),
-        'player_2_seq':str(player_2_seq),
-        'player_1_wins_cards':0,
-        'ties_cards':0,
-        'player_1_wins_tricks':0,
-        'ties_tricks':0
-        }
+        
+        #if an existing dictionary of wins is passed, continue adding to it 
+        if old_wins != None:
+            wins_dict = old_wins
+            
+        #no dictionary passed -> create an empty one
+        else:
+            wins_dict = {
+            'player_1_seq':str(player_1_seq),
+            'player_2_seq':str(player_2_seq),
+            'player_1_wins_cards':0,
+            'ties_cards':0,
+            'player_1_wins_tricks':0,
+            'ties_tricks':0
+            }
+            
 
-        #if players are the same sequence, make results null
+        #if players are the same sequence, make results null and dont run loop
         if player_1_seq == player_2_seq:
             wins_dict = {
             'player_1_seq':str(player_1_seq),
@@ -153,6 +143,7 @@ def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "array
             'player_1_wins_tricks':None,
             'ties_tricks':None
             }
+            return wins_dict
 
         #play the game on each deck and save when player 1 wins
         for deck in decks:
@@ -170,12 +161,42 @@ def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "array
             elif game_dict['winner_tricks'] == 'tie':
                 wins_dict['ties_tricks'] += 1 
 
-        #convert that to a DF
-        wins_dict_df = pd.DataFrame(wins_dict, index = [0])
         
-        #add that to the total results
-        results = pd.concat([results, wins_dict_df])
+        return wins_dict
+
+
+def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "dataframe":
+
+    #loading decks
+    decks = np.load(deck_path)
+
+    #creating an empty dataframe of results
+    results = pd.DataFrame(columns = ('player_1_seq',
+                                    'player_2_seq',
+                                    'player_1_wins_cards', 
+                                    'ties_cards', 
+                                    'player_1_wins_tricks',
+                                    'ties_tricks'))
+    all_wins = {}
+    
+    #simulate games for each combination
+    for (player_1_seq, player_2_seq) in combinations:
         
+        wins = simulate_combination(player_1_seq, player_2_seq, decks)
+                #convert that to a DF
+        wins_df = pd.DataFrame(wins, index = [0])
+        results = pd.concat([results, wins_df])
+        
+        all_wins[str((player_1_seq, player_2_seq))] = wins
+                           
+    n_games = len(decks)
+                           
+    return results, n_games, all_wins
+
+
+
+def process_results(results, n_games):
+    
     #reshape card results to be an array
     results_cards = results[['player_1_seq', 'player_2_seq', 'player_1_wins_cards']]
 
@@ -199,11 +220,38 @@ def simulate_games(deck_path: 'filepath', combinations = COMBINATIONS) -> "array
                                      columns = 'player_2_seq').astype(float)
     
     #calculate win rate pct instead of total
-    results_cards_rate = results_cards_matrix/len(decks)* 100
-    results_tricks_rate = results_tricks_matrix/len(decks)* 100
-    ties_cards_rate = ties_cards_matrix/len(decks) * 100
-    ties_tricks_rate = ties_tricks_matrix/len(decks) * 100
+    results_cards_rate = results_cards_matrix/n_games* 100
+    results_tricks_rate = results_tricks_matrix/n_games* 100
+    ties_cards_rate = ties_cards_matrix/n_games * 100
+    ties_tricks_rate = ties_tricks_matrix/n_games * 100
     
    
 
-    return results, results_cards_rate, results_tricks_rate, ties_cards_rate, ties_tricks_rate, len(decks)
+    return results_cards_rate, results_tricks_rate, ties_cards_rate, ties_tricks_rate
+
+
+def add_decks (old_wins, old_results, new_deck_path, n_games, combinations = COMBINATIONS):
+
+    #loading decks
+    new_decks = np.load(new_deck_path)
+    
+    all_wins = old_wins
+
+    for (player_1_seq, player_2_seq) in combinations:
+        
+        #accessing the old win dictionary
+        old_wins_combination = old_wins[str((player_1_seq, player_2_seq))]
+
+        wins = simulate_combination(player_1_seq, player_2_seq, new_decks, old_wins = old_wins_combination)
+        
+         #convert that to a DF
+        wins_df = pd.DataFrame(wins, index = [0])
+        results = pd.concat([old_results, wins_df])
+
+        all_wins[str((player_1_seq, player_2_seq))] = wins
+        
+                           
+    n_games = n_games + len(new_decks)
+                           
+    return results, n_games, all_wins
+    

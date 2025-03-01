@@ -77,21 +77,3 @@ def save_decks(n_decks: int, seed_path = None, filepath = "data") -> str:
     return deck_file
 
 
-
-def add_decks( n_new_decks, old_decks_path: "filepath", seed_path: "filepath", filepath = "data")-> str: 
-
-    """returns filename of a new set of decks with n_new_decks more decks"""
-
-    old_decks = np.load(old_decks_path)
-    new_decks = np.load(save_decks(n_new_decks, seed_path = seed_path))
-
-    all_decks = np.concatenate((old_decks, new_decks))
-
-    deck_file = f"{filepath}/decks_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.npy"
-    
-    #save_decks
-    np.save(deck_file, all_decks)
-
-
-    return deck_file
-

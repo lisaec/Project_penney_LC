@@ -2,23 +2,28 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import simulation
 
-
-def make_plot(filename = str,
-              cards = 'DataFrame',
-              tricks = 'DataFrame',
-              ties_cards = 'DataFrame',
-              ties_tricks = 'DataFrame') -> None:
+def make_plot(filename: str,
+              results: "dataframe",
+              n_games: int) -> None:
 
     """makes two heatmaps of game outcomes, one for cards and one for tricks.
         ties are shown in parentheses below win rate
         saves plot as filename given in a folder, heatmaps"""
+
+    #process results
+
+    cards, tricks, ties_cards, ties_tricks = simulation.process_results(results, n_games)
 
     # set colortheme
     sns.set_theme(style='white')
 
     #create subplots
     fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+
+    #full title
+    plt.suptitle(f"Penney's Game Simulation ({n_games:,} iterations)", fontsize=14, fontweight="bold", y = 0.95)
 
     #creating label dataframes
     annot_cards = cards.map(lambda x: f"{x:.1f}%") + "\n(" + ties_cards.map(lambda x: f"{x:.1f}%") + ")"
