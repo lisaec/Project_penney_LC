@@ -4,7 +4,7 @@
  In this repository, I have created code to simulate hundreds of thousands of shuffled decks and play every possible combination of sequence selections. I then process the results and create heatmaps to show the likelihood of winning each game by number of cards and number of tricks.
 
 ## Simulation Results
-After simulating every combination of sequences on 1 Million decks, here were the preliminary results. 
+After simulating every combination of sequences on 1 million decks, here were the preliminary results. 
 
 These results were created in **Main.py**
 
