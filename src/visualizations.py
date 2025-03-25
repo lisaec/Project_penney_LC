@@ -36,7 +36,7 @@ def make_plot(results: pd.DataFrame,
 
     # Cards
     sns.heatmap(cards,linewidth=.5, cmap= cmap, ax=axes[0], cbar=False, annot = annot_cards, fmt = "")
-    axes[0].set_title("Player 2 wins (Cards)")
+    axes[0].set_title("Player 2 Win Rate (Cards)")
     axes[0].set_xlabel("Player 2 Selection")
     axes[0].set_ylabel("Player 1 Selection") 
     axes[0].tick_params(axis='y', rotation=0)
@@ -45,7 +45,7 @@ def make_plot(results: pd.DataFrame,
 
     # Tricks
     sns.heatmap(tricks,linewidth=.5, cmap= cmap, ax=axes[1], cbar=False, annot = annot_tricks, fmt = "")
-    axes[1].set_title("Player 2 wins (Tricks)")
+    axes[1].set_title("Player 2 Win Rate (Tricks)")
     axes[1].set_xlabel("Player 1 Selection")
     axes[1].set_ylabel("Player 2 Selection") 
     axes[1].tick_params(axis='y', rotation=0)
