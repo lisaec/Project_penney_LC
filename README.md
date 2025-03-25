@@ -13,7 +13,7 @@ These results were created in **Main.py**
 ## Quick Start:
 This repository has the capability to generate and save decks, run simulations, add additional simulations to existing game outcomes, and visualize the results.
 
-For an example workflow of creating decks, running the simulation, adding additional decks and saving visualizations, use the **run_simulations.ipynb** notebook.
+For a step-by-step example workflow of creating decks, running the simulation, adding additional decks and saving visualizations, check out the **run_simulations.ipynb** notebook.
 
 ### I am grading this project and just want to add decks:
 For an example of adding decks to existing results, you can use **add_decks.py**
